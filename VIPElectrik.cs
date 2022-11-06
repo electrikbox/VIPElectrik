@@ -9,7 +9,7 @@ using Oxide.Game.Rust.Cui;
 
 namespace Oxide.Plugins
 {
-    [Info("VIPElectrik", "Electrik", "1.1.0")]
+    [Info("VIPElectrik", "Electrik", "1.1.1")]
     [Description("add player to vip oxide group for a set of time")]
 
     public class VIPElectrik : RustPlugin
@@ -199,27 +199,30 @@ namespace Oxide.Plugins
 
         private void RemovePlayerData(string[] args, IPlayer user)
         {
+            removeKeys.Clear();
             BasePlayer player = user.Object as BasePlayer;
+            BasePlayer vipPlayer = GetPlayerByNameOrId(args[0]);
+
             foreach (var element in data.Players)
             {
+                if(data.Players.Count == 0) return;
                 if(element.Value.Name.ToLower().Contains(args[0]) || args[0] == element.Key.ToString())
                 {
-                    BasePlayer vipPlayer = GetPlayerByNameOrId(args[0]);
-
                     CuiHelper.DestroyUi(vipPlayer, mainPanelName);
                     permission.RemoveUserGroup(element.Key.ToString(), settings.oxideGroupName);
+                    removeKeys.Add(element.Key);
                     data.Players.Remove(element.Key);
                     SaveData();
                     Msg(user, player, $"{element.Value.Name} Removed from VIPs", $"<color=#FFAE17>{element.Value.Name}</color> removed from VIPs");
                     break;
                 }
-
-                if(data.Players.Count == 0)
-                    return;
-                
-                else
-                    Msg(user, player, "Player not found in data", "Player not found in data");
             }
+
+            if(removeKeys.Count == 0)
+            {
+                Msg(user, player, "Player not found in data", "Player not found in data");
+            }
+            removeKeys.Clear();
         }
 
         private void AdminRemoveData(IPlayer user, string command, string[] args)
