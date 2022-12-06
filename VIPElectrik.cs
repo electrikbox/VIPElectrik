@@ -24,7 +24,7 @@ namespace Oxide.Plugins
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         #region CONFIG
-        
+
         private ConfigData settings;
 
         private class ConfigData
@@ -49,7 +49,7 @@ namespace Oxide.Plugins
             SaveConfig(settings);
             return true;
         }
-    
+
 
         private void SaveConfig(ConfigData settings) => Config.WriteObject(settings, true);
 
@@ -109,7 +109,7 @@ namespace Oxide.Plugins
 
             timer.Every(settings.timerRefresh, vipEnd);
 
-            if(BasePlayer.activePlayerList.Count == 0)
+            if (BasePlayer.activePlayerList.Count == 0)
                 return;
 
             foreach (var element in data.Players)
@@ -132,33 +132,33 @@ namespace Oxide.Plugins
         private void OnPlayerConnected(BasePlayer player) => ToggleTimerGUI(player);
         private void OnServerSave() => SaveData();
         #endregion
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         #region OWN FUNCTIONS
-		
-		private BasePlayer GetPlayerByNameOrId(string nameorid) => BasePlayer.activePlayerList.FirstOrDefault(x => x.displayName.Contains(nameorid, System.Globalization.CompareOptions.OrdinalIgnoreCase) || x.UserIDString == nameorid);
-        
+
+        private BasePlayer GetPlayerByNameOrId(string nameorid) => BasePlayer.activePlayerList.FirstOrDefault(x => x.displayName.Contains(nameorid, System.Globalization.CompareOptions.OrdinalIgnoreCase) || x.UserIDString == nameorid);
+
         private void AddPlayerToVipGroup(IPlayer user, string command, string[] args)
         {
             var player = user.Object as BasePlayer;
             var nowDate = DateTime.Now;
             int days = 0;
 
-            if(!user.IsAdmin)
+            if (!user.IsAdmin)
             {
                 player.ChatMessage("You're not allowed to use this command");
                 return;
             }
-            
-            if(args.Length < 2)
+
+            if (args.Length < 2)
             {
                 Msg(user, player, "Missing args : vipadd *steamid* *time (days)*", "\n<color=#FFAE17>Missing args:</color> /addvip *name or steamid* *time (days)*");
                 return;
             }
 
             BasePlayer vipPlayer = GetPlayerByNameOrId(args[0]);
-				
-            if(vipPlayer == null)
+
+            if (vipPlayer == null)
             {
                 Msg(user, player, "Player not found or Offline", "Player not found or Offline");
                 return;
@@ -170,7 +170,7 @@ namespace Oxide.Plugins
                 return;
             }
 
-            if (days > 360)
+            if (days > 365)
             {
                 Msg(user, player, "Too many days : You can't set more than 365 days for vip*", "\n<color=#FFAE17>Too many days:</color> You can't set more than 365 days for vip*");
                 return;
@@ -178,11 +178,11 @@ namespace Oxide.Plugins
 
             cooldownTime = new TimeSpan(days, 0, 0, 0);
 
-            if(vipPlayer.IPlayer.BelongsToGroup(settings.oxideGroupName))
+            if (vipPlayer.IPlayer.BelongsToGroup(settings.oxideGroupName))
                 permission.RemoveUserGroup(vipPlayer.ToString(), settings.oxideGroupName);
 
             permission.AddUserGroup(vipPlayer.UserIDString, settings.oxideGroupName);
-                                                    
+
             data.Players[vipPlayer.userID] = new DataEntry
             {
                 Name = vipPlayer.displayName,
@@ -205,8 +205,8 @@ namespace Oxide.Plugins
 
             foreach (var element in data.Players)
             {
-                if(data.Players.Count == 0) return;
-                if(element.Value.Name.ToLower().Contains(args[0]) || args[0] == element.Key.ToString())
+                if (data.Players.Count == 0) return;
+                if (element.Value.Name.ToLower().Contains(args[0]) || args[0] == element.Key.ToString())
                 {
                     CuiHelper.DestroyUi(vipPlayer, mainPanelName);
                     permission.RemoveUserGroup(element.Key.ToString(), settings.oxideGroupName);
@@ -218,7 +218,7 @@ namespace Oxide.Plugins
                 }
             }
 
-            if(removeKeys.Count == 0)
+            if (removeKeys.Count == 0)
             {
                 Msg(user, player, "Player not found in data", "Player not found in data");
             }
@@ -228,20 +228,20 @@ namespace Oxide.Plugins
         private void AdminRemoveData(IPlayer user, string command, string[] args)
         {
             BasePlayer player = user.Object as BasePlayer;
-            
-            if(!user.IsAdmin)
+
+            if (!user.IsAdmin)
             {
                 player.ChatMessage("You're not allowed to use this command");
                 return;
             }
-            
-            if(data.Players.Count == 0)
+
+            if (data.Players.Count == 0)
             {
                 Msg(user, player, "Data file is empty", "Data file is empty");
                 return;
-            
+
             }
-            if(args.Length == 0)
+            if (args.Length == 0)
             {
                 Msg(user, player, "Wrong args remove player data: vipremove *name or steamid*", "\n<color=#FFAE17>remove player data:</color> /vipremove *name or steamid*");
                 return;
@@ -278,7 +278,7 @@ namespace Oxide.Plugins
 
         private void Msg(IPlayer user, BasePlayer player, string putsMSG, string chatMSG)
         {
-            if(user.IsServer)
+            if (user.IsServer)
             {
                 Puts(putsMSG);
                 return;
@@ -293,7 +293,7 @@ namespace Oxide.Plugins
             DateTime endDate = DateTime.Parse(element);
             TimeSpan timeLeftTimer = endDate - nowDate;
             string getTimeleft = timeLeftTimer.ToString(@"dd\:hh\:mm\:ss");
-            
+
             return getTimeleft;
         }
 
@@ -303,7 +303,7 @@ namespace Oxide.Plugins
             foreach (var element in data.Players)
             {
                 BasePlayer vipPlayer = GetPlayerByNameOrId(element.Value.Name);
-                if(player == vipPlayer) { element.Value.UIShow = !element.Value.UIShow; }
+                if (player == vipPlayer) { element.Value.UIShow = !element.Value.UIShow; }
             }
             SaveData();
             BuildUI(player);
@@ -323,8 +323,9 @@ namespace Oxide.Plugins
         {
             foreach (var element in data.Players)
             {
-                try {
-                    if(player.UserIDString == element.Key.ToString() && player.IsConnected && element.Value.UIShow)
+                try
+                {
+                    if (player.UserIDString == element.Key.ToString() && player.IsConnected && element.Value.UIShow)
                     {
                         timeleft = VipGetPlayerTimeLeft(element.Value.Date);
 
@@ -339,7 +340,7 @@ namespace Oxide.Plugins
 
                         UI_AddText(container, "vip_panel", "1 1 1 1", $"VIP :  <color={settings.ui.timerColor}>{timeleft}</color>",
                             TextAnchor.MiddleCenter, 11, "0 0", "0 0");
-                        
+
                         CuiHelper.DestroyUi(player, mainPanelName);
                         CuiHelper.AddUi(player, container);
                         break;
@@ -348,59 +349,60 @@ namespace Oxide.Plugins
                     {
                         CuiHelper.DestroyUi(player, mainPanelName);
                     }
-                } catch(Exception){}
+                }
+                catch (Exception) { }
             }
         }
 
-		private static void UI_AddAnchor(CuiElementContainer container, string name, string parentName, string anchorMin, string anchorMax)
-		{
-			container.Add(new CuiElement
-			{
-				Name = name,
-				Parent = parentName,
-				Components =
-				{ 
-					new CuiImageComponent
-					{
-						Color = "0 0 0 0"
-					},
-					new CuiRectTransformComponent
-					{
-						AnchorMin = anchorMin,
-						AnchorMax = anchorMax,
-						OffsetMin = "0 0",
-						OffsetMax = "0 0",
-					},
+        private static void UI_AddAnchor(CuiElementContainer container, string name, string parentName, string anchorMin, string anchorMax)
+        {
+            container.Add(new CuiElement
+            {
+                Name = name,
+                Parent = parentName,
+                Components =
+                {
+                    new CuiImageComponent
+                    {
+                        Color = "0 0 0 0"
+                    },
+                    new CuiRectTransformComponent
+                    {
+                        AnchorMin = anchorMin,
+                        AnchorMax = anchorMax,
+                        OffsetMin = "0 0",
+                        OffsetMax = "0 0",
+                    },
 					// new CuiNeedsCursorComponent()
 				},
-			});
-		}
+            });
+        }
 
-		private static void UI_AddPanel(CuiElementContainer container, string name, string parentName, string color, string offsetMin, string offsetMax)
-		{
-			container.Add(new CuiElement
-			{
+        private static void UI_AddPanel(CuiElementContainer container, string name, string parentName, string color, string offsetMin, string offsetMax)
+        {
+            container.Add(new CuiElement
+            {
                 Name = name,
-				Parent = parentName,
-				Components =
-				{
-					new CuiImageComponent
-					{
-						Color = color,
-						Material = "assets/content/ui/namefontmaterial.mat"
-					},
-					new CuiRectTransformComponent
-					{
-						AnchorMin = "0 0",
-						AnchorMax = "0 0",
-						OffsetMin = offsetMin,
-						OffsetMax = offsetMax,
-					}
-				},
-			});
-		}
+                Parent = parentName,
+                Components =
+                {
+                    new CuiImageComponent
+                    {
+                        Color = color,
+                        Material = "assets/content/ui/namefontmaterial.mat"
+                    },
+                    new CuiRectTransformComponent
+                    {
+                        AnchorMin = "0 0",
+                        AnchorMax = "0 0",
+                        OffsetMin = offsetMin,
+                        OffsetMax = offsetMax,
+                    }
+                },
+            });
+        }
 
-		private static void UI_AddText(CuiElementContainer container, string parentName, string color, string text, TextAnchor textAnchor, int fontSize, string offsetMin, string offsetMax)
+        private static void UI_AddText(CuiElementContainer container, string parentName, string color, string text, TextAnchor textAnchor, int fontSize, string offsetMin, string offsetMax)
         {
             container.Add(new CuiLabel
             {
@@ -433,7 +435,7 @@ namespace Oxide.Plugins
             foreach (var element in data.Players)
             {
                 BasePlayer vipPlayer = GetPlayerByNameOrId(element.Value.Name);
-                if(player == vipPlayer) return true;
+                if (player == vipPlayer) return true;
             }
             return false;
         }
@@ -443,7 +445,7 @@ namespace Oxide.Plugins
             foreach (var element in data.Players)
             {
                 BasePlayer vipPlayer = GetPlayerByNameOrId(element.Value.Name);
-                if(player == vipPlayer) { return element.Value.UIShow; }
+                if (player == vipPlayer) { return element.Value.UIShow; }
             }
             return false;
         }
@@ -453,7 +455,7 @@ namespace Oxide.Plugins
             foreach (var element in data.Players)
             {
                 BasePlayer vipPlayer = GetPlayerByNameOrId(element.Value.Name);
-                if(player == vipPlayer)
+                if (player == vipPlayer)
                 {
                     var nowDate = DateTime.Now;
                     DateTime endDate = DateTime.Parse(element.Value.Date);
