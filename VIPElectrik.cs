@@ -9,7 +9,7 @@ using Oxide.Game.Rust.Cui;
 
 namespace Oxide.Plugins
 {
-    [Info("VIPElectrik", "Electrik", "1.1.1")]
+    [Info("VIPElectrik", "Electrik", "1.2.1")]
     [Description("add player to vip oxide group for a set of time")]
 
     public class VIPElectrik : RustPlugin
@@ -77,7 +77,7 @@ namespace Oxide.Plugins
 
         private class DataEntry
         {
-            [JsonProperty("Date")] public string Date;
+            [JsonProperty("Date")] public DateTime Date;
             [JsonProperty("Name")] public string Name;
             [JsonProperty("Time")] public string Time;
             [JsonProperty("UI Show")] public bool UIShow;
@@ -178,15 +178,21 @@ namespace Oxide.Plugins
 
             cooldownTime = new TimeSpan(days, 0, 0, 0);
 
-            if (vipPlayer.IPlayer.BelongsToGroup(settings.oxideGroupName))
-                permission.RemoveUserGroup(vipPlayer.ToString(), settings.oxideGroupName);
+            if (IsVIP(vipPlayer))
+            {
+                data.Players[vipPlayer.userID].Date += new TimeSpan(int.Parse(args[1]), 0, 0, 0);
+                Puts($"Adding {args[1]} day(s) to {vipPlayer.displayName}'s VIP.");
+                SaveData();
+                ToggleTimerGUI(vipPlayer);
+                return;
+            }
 
             permission.AddUserGroup(vipPlayer.UserIDString, settings.oxideGroupName);
 
             data.Players[vipPlayer.userID] = new DataEntry
             {
                 Name = vipPlayer.displayName,
-                Date = nowDate.Add(cooldownTime).ToString(),
+                Date = nowDate.Add(cooldownTime),
                 Time = cooldownTime.ToString(),
                 UIShow = true,
                 AdminWhoDidCommand = user.Name + " : " + nowDate.ToString()
@@ -287,10 +293,10 @@ namespace Oxide.Plugins
             Puts($"{putsMSG}");
         }
 
-        private string VipGetPlayerTimeLeft(string element)
+        private string VipGetPlayerTimeLeft(DateTime element)
         {
             var nowDate = DateTime.Now;
-            DateTime endDate = DateTime.Parse(element);
+            DateTime endDate = element;
             TimeSpan timeLeftTimer = endDate - nowDate;
             string getTimeleft = timeLeftTimer.ToString(@"dd\:hh\:mm\:ss");
 
@@ -458,7 +464,7 @@ namespace Oxide.Plugins
                 if (player == vipPlayer)
                 {
                     var nowDate = DateTime.Now;
-                    DateTime endDate = DateTime.Parse(element.Value.Date);
+                    DateTime endDate = element.Value.Date;
                     TimeSpan timeLeftTimer = endDate - nowDate;
                     return timeLeftTimer;
                 }
