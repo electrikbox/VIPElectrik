@@ -88,7 +88,7 @@ Exemple data file:
 private bool IsVIP(BasePlayer player) //true if player is VIP, else false.
 ```
 ```CS
-private bool IsVipTimerShow(BasePlayer player) //true if player has is timer ON, else false.
+private bool IsVipTimerShow(BasePlayer player) //true if player has timer ON, else false.
 ```
 ```CS
 TimeSpan VIPTimeLeft(BasePlayer player) //get actual vip time left from player
